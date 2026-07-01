@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "specificity-index"
+version = "0.1.0"
+description = "Baek's Specificity Index: a network-analytic, game-theoretic measure of rater reasoning concentration."
+authors = [
+    { name = "Asclep Inc." },
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+]
+# Dual-licensed (program decision D3): noncommercial use under PolyForm
+# Noncommercial License 1.0.0 (LICENSE.md, verbatim); commercial use requires
+# written approval from Asclep Inc. PolyForm NC 1.0.0 is not an OSI/SPDX-listed
+# identifier, so the license file is referenced directly.
+license = { file = "LICENSE.md" }
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["specificity_index*"]
+
+[tool.pytest.ini_options]
+# Constrain collection to the tests/ directory so pytest never tries to
+# glob-expand the parent directory name (which contains bracket characters).
+testpaths = ["tests"]
+asyncio_mode = "auto"

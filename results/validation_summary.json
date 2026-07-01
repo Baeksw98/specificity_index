@@ -1,0 +1,11 @@
+{
+  "n_assignment_rows": 20511102,
+  "n_traces": 9158327,
+  "questions": 15,
+  "si_gr_gt_nongr_count": 14,
+  "si_gr_gt_nongr_total": 15,
+  "mean_delta_SI": 0.2041,
+  "mean_SI_GR": 0.9198,
+  "mean_SI_NonGR": 0.7158,
+  "elapsed_sec": 857.9
+}
