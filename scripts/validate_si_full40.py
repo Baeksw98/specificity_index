@@ -1,23 +1,59 @@
-"""Validate Baek's Specificity Index on the full 40-patient semantic data.
+"""Validate Baek's Specificity Index on a full40 claim-assignment table.
 
 Loads the complete claim-assignment table, computes SI / AC per (question,
 protocol) with the locked library, and writes the per-question table plus a
 top-Anchoring-Credit table. This is the gate-B empirical validation and the
-source of Paper 1's results. Deterministic; no fabricated values.
+source of Paper 1's results.
+
+The raw claim-assignment table is not included in the public repository.
+Pass it explicitly:
+
+    python scripts/validate_si_full40.py \
+        --claim-assignments /path/to/claim_assignments.csv
 """
 from __future__ import annotations
-import sys, time, json
+import argparse
+import json
+import sys
+import time
 from pathlib import Path
 
-REPO = Path("/NHNHOME/WORKSPACE/0226010051_A/[Self Research-#2] Specificity_index")
+REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 import pandas as pd  # noqa: E402
 import specificity_index as si  # noqa: E402
 from specificity_index.scope import IN_SCOPE  # noqa: E402
 
-CSV = Path("/NHNHOME/WORKSPACE/0226010051_A/data/reports/protocol_study/qualitative_analysis/question_deep_dive_full40_semantic/claim_assignments.csv")
-OUT = REPO / "results"
-OUT.mkdir(exist_ok=True)
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Validate Specificity Index point estimates on a claim-assignment CSV."
+    )
+    parser.add_argument(
+        "--claim-assignments",
+        type=Path,
+        required=True,
+        help=(
+            "Long-format CSV with patient_id, question, protocol, trace_id, "
+            "and claim_code columns. The raw full40 table is not distributed "
+            "with the public repository."
+        ),
+    )
+    parser.add_argument(
+        "--out-dir",
+        type=Path,
+        default=REPO / "results",
+        help="Directory for specificity_index_full40.csv and related outputs.",
+    )
+    return parser.parse_args()
+
+
+args = _parse_args()
+CSV = args.claim_assignments
+OUT = args.out_dir
+if not CSV.exists():
+    raise SystemExit(f"claim-assignment CSV not found: {CSV}")
+OUT.mkdir(parents=True, exist_ok=True)
 
 t0 = time.time()
 df = pd.read_csv(

@@ -20,11 +20,12 @@ the bootstrap and stops with a non-zero exit code if either fails:
 
 Usage
 -----
-    /NHNHOME/WORKSPACE/0226010051_A/T2D_Research/.venv/bin/python \\
-        scripts/run_bootstrap_full40.py
+    python scripts/run_bootstrap_full40.py \\
+        --claim-assignments /path/to/claim_assignments.csv
 """
 from __future__ import annotations
 
+import argparse
 import sys
 import time
 from pathlib import Path
@@ -39,15 +40,48 @@ import numpy as np  # noqa: E402
 import specificity_index as si  # noqa: E402
 from specificity_index.bootstrap import specificity_bootstrap  # noqa: E402
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run patient-clustered SI bootstrap on a claim-assignment CSV."
+    )
+    parser.add_argument(
+        "--claim-assignments",
+        type=Path,
+        required=True,
+        help=(
+            "Long-format CSV with patient_id, question, protocol, trace_id, "
+            "and claim_code columns. The raw full40 table is not distributed "
+            "with the public repository."
+        ),
+    )
+    parser.add_argument(
+        "--existing",
+        type=Path,
+        default=REPO / "results" / "specificity_index_full40.csv",
+        help="Locked point-estimate CSV used for the pre-bootstrap sanity check.",
+    )
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=REPO / "results" / "specificity_index_full40_ci.csv",
+        help="Output CSV path for bootstrap CIs and p-values.",
+    )
+    parser.add_argument("--n-boot", type=int, default=2000, help="Bootstrap replicates.")
+    parser.add_argument("--seed", type=int, default=20260701, help="Bootstrap RNG seed.")
+    return parser.parse_args()
+
+
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-CSV = Path(
-    "/NHNHOME/WORKSPACE/0226010051_A/data/reports/protocol_study/"
-    "qualitative_analysis/question_deep_dive_full40_semantic/claim_assignments.csv"
-)
-EXISTING = REPO / "results" / "specificity_index_full40.csv"
-OUT_CI = REPO / "results" / "specificity_index_full40_ci.csv"
+args = _parse_args()
+CSV = args.claim_assignments
+EXISTING = args.existing
+OUT_CI = args.out
+if not CSV.exists():
+    raise SystemExit(f"claim-assignment CSV not found: {CSV}")
+if not EXISTING.exists():
+    raise SystemExit(f"locked point-estimate CSV not found: {EXISTING}")
 
 MISMATCH_TOL = 1e-6   # sanity check against existing locked CSV
 INTERNAL_TOL = 1e-9   # internal self-consistency check
@@ -133,14 +167,14 @@ print(
 # Run bootstrap
 # ---------------------------------------------------------------------------
 print(
-    f"[{time.time()-t0:.1f}s] Starting bootstrap (n_boot=2000, seed=20260701) …",
+    f"[{time.time()-t0:.1f}s] Starting bootstrap (n_boot={args.n_boot}, seed={args.seed}) …",
     flush=True,
 )
 
 result = specificity_bootstrap(
     df,
-    n_boot=2000,
-    seed=20260701,
+    n_boot=args.n_boot,
+    seed=args.seed,
     gr_label="GR",
     non_gr_label="Non-GR",
 )
@@ -196,7 +230,7 @@ print(f"[{time.time()-t0:.1f}s] Saved → {OUT_CI}", flush=True)
 # ---------------------------------------------------------------------------
 print("\n" + "=" * 90)
 print("Per-question Specificity Index: 95% CIs and FDR-adjusted p-values")
-print("(spec §6: patient-clustered bootstrap, n_boot=2000, seed=20260701)")
+print(f"(spec §6: patient-clustered bootstrap, n_boot={args.n_boot}, seed={args.seed})")
 print("=" * 90)
 
 header = (

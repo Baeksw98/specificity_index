@@ -25,6 +25,7 @@ pip install -e .            # numpy + pandas only; Python >= 3.10
 ```python
 import pandas as pd, specificity_index as si
 df = pd.read_csv("claim_assignments.csv")   # patient_id, question, protocol, trace_id, claim_code
+cell = df[(df["question"] == "Q3.1") & (df["protocol"] == "GR")]
 si.specificity_index(cell, "Q3.1")          # the index for one cell
 si.anchoring_credit(cell, "Q3.1")           # {category: psi_c}, sums to SI
 si.specificity_table(df)                    # per-question SI by condition + difference
@@ -36,7 +37,7 @@ The in-scope category map (`specificity_index.scope.IN_SCOPE`) is domain-specifi
 - `specificity_index/` — the library (`network.py`, `index.py`, `bootstrap.py`, `scope.py`).
 - `tests/` — unit tests (run from inside this directory: `python -m pytest tests/`).
 - `README.md` — quickstart; this file — the fuller explanation.
-- `LICENSE.md` — PolyForm Noncommercial 1.0.0 (verbatim) + the Asclep Inc. commercial notice.
+- `LICENSE` / `LICENSE.md` — PolyForm Noncommercial 1.0.0 (verbatim) + the Asclep Inc. commercial notice.
 - `examples/` — a worked example reproducing the headline numbers from the accompanying paper.
 
 ## How to cite

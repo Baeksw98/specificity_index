@@ -14,8 +14,8 @@ dependencies = [
     "numpy",
     "pandas",
 ]
-# Dual-licensed (program decision D3): noncommercial use under PolyForm
-# Noncommercial License 1.0.0 (LICENSE.md, verbatim); commercial use requires
+# Noncommercial use under PolyForm Noncommercial License 1.0.0
+# (LICENSE and LICENSE.md, verbatim); commercial use requires
 # written approval from Asclep Inc. PolyForm NC 1.0.0 is not an OSI/SPDX-listed
 # identifier, so the license file is referenced directly.
 license = { file = "LICENSE.md" }
